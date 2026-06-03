@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      .checkerboard {
+            background-size: 50px 50px;
+            background-image: 
+        linear-gradient(45deg, #00000000 25%, transparent 25%, 
+                        transparent 75%, #00000000 75%, #2e2e2e00),
+        linear-gradient(45deg, #00000000 25%, transparent 25%, 
+                        transparent 75%, #00000000 75%, #2d2d2d00),
+        linear-gradient(45deg, #ffffff05 25%, transparent 25%, 
+                        transparent 75%, #ffffff05 75%, #ffffff05),
+        linear-gradient(45deg, #ffffff05 25%, transparent 25%, 
+                        transparent 75%, #ffffff05 75%, #ffffff05);
+            background-position: 0 0, 25px 25px, 25px 0, 0 25px;
+        }
+        .checkerboard2 {
+            background-size: 20px 20px;
+            background-image: 
+        linear-gradient(45deg, #00000020 25%, transparent 25%, 
+                        transparent 75%, #00000020 75%, #2e2e2e20),
+        linear-gradient(45deg, #00000020 25%, transparent 25%, 
+                        transparent 75%, #00000020 75%, #2d2d2d20),
+        linear-gradient(45deg, #5b5b5b20 25%, transparent 25%, 
+                        transparent 75%, #5b5b5b20 75%, #ffffff20),
+        linear-gradient(45deg, #5b5b5b20 25%, transparent 25%, 
+                        transparent 75%, #5b5b5b20 75%, #ffffff20);
+            background-position: 0 0, 10px 10px, 10px 0, 0 10px;
+        }
+      body {
+        font-family: 'Consolas', monospace;
+        background-color: rgb(32, 0, 32);
+        color: white;
+        align-items: center;
+        display: flex;
+        justify-content: center;
+        text-align: center;
+        width: 100%;
+  height: 100%;
+  margin: auto;
+  text-align: center;
+      }
+      .center {
+        position: relative;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
+      #fileInput {
+  text-align-last: center;
+  margin: auto;
+}
+button {
+  background-color: #000000;
+  color: #ffffff;
+}
+      .center2 {
+  margin-left: auto;
+  margin-right: auto;
+}
+/* Custom player style */
+#section3 midi-player {
+  display: block;
+  width: inherit;
+  margin: 4px;
+  margin-bottom: 0;
+}
+#section3 midi-player::part(control-panel) {
+  background: rgb(180, 0, 156);
+  border: 2px solid #000;
+  border-radius: 10px 10px 0 0;
+}
+#section3 midi-player::part(play-button) {
+  color: #353;
+  border: 2px solid currentColor;
+  background-color: rgb(0, 153, 255);
+  border-radius: 20px;
+  transition: all 0.2s;
+  content: 'hello';
+}
+#section3 midi-player::part(play-button):hover {
+  color: #0a0;
+  background-color: #5f5;
+  border-radius: 10px;
+}
+#section3 midi-player::part(time) {
+  font-family: monospace;
+}
+
+/* Custom visualizer style */
+#section3 midi-visualizer .piano-roll-visualizer {
+  background: rgb(61, 0, 63);
+  border: 2px solid black;
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  margin: 4px;
+  margin-top: 0;
+  overflow: auto;
+}
+#section3 midi-visualizer svg rect.note {
+  opacity: 0.6;
+  stroke-width: 2;
+}
+#section3 midi-visualizer svg rect.note[data-instrument="0"]{
+  fill: rgb(238, 34, 187);
+  stroke: rgb(85, 0, 57);
+}
+#section3 midi-visualizer svg rect.note[data-instrument="2"]{
+  fill: #2ee;
+  stroke: #055;
+}
+#section3 midi-visualizer svg rect.note[data-is-drum="true"]{
+  fill: #888;
+  stroke: #888;
+}
+#section3 midi-visualizer svg rect.note.active {
+  opacity: 0.9;
+  stroke: #000;
+}
+    </style>
+  </head>
+<body class='checkerboard'>
+  <div class='center' style='position: absolute; width: 90%; height: 90%; background-color: #000000f0; z-index: 1; display: none; overflow-y: auto; overflow-x: hidden;' id='infomenu'>
+    <h2>Digital Rotter by LandonPET</h2>
+    <br>
+    <img src='LandonPETicon.png'>
+    <pre>This is inspired by the phenomenon of <a href='https://en.wikipedia.org/wiki/Data_degradation'>Digital rot</a>
+    which can be caused by cosmic rays flipping random bits in data overtime</pre>
+    <br>
+    <br>
+    <pre>
+      Supported formats for previewing in browser
+
+      Browser supported images
+      Browser supported videos
+      Browser supported audios
+      Text files
+      .mid/midi files
+      .nes rom files
+
+      Note that even if a file isn't supported for previewing
+      you can still put it in and download it.
+      ANY file can be used for this purpose
+      (but be careful!)
+    </pre>
+    <br>
+    <pre>
+      JS libraries used
+      <a href='https://nostalgist.js.org/'>Nostalgist</a> for NES ROMs
+      <a href='https://github.com/cifkao/html-midi-player'>html-midi-player</a> for MIDI
+    </pre>
+  </div>
+<pre style='position: absolute; top: 0; right: 0; font-size: 12px; margin-right: 32px; text-align: right; margin-top: 0;'>Version
+  1.3</pre>
+<button style='font-size: 20px; padding: 0; width: 32px; position: absolute; top: 0; right: 0;' onclick='if (document.getElementById("infomenu").style.display == "none") { document.getElementById("infomenu").style.display = "" } else { document.getElementById("infomenu").style.display = "none" }'>🛈</button>
+<label style='font-size: 36px; position: absolute; top: 0px;'>Digital Rot Emulator</label>
+<input class="center2" style='position:absolute; top: 0; margin:auto; margin-top: 48px;' type='file' id='fileInput'>
+<br>
+<br>
+<div class="center2" id='controls' style='display: none; margin-top: 77px;'>
+  <div id='nescontrols' style='display: none;'>
+    <canvas id="nescanvas" width="625" height="480" style='background-color: black;'></canvas>
+    <br>
+    <button onclick='runCurrentGameNES()'>Reset</button>
+    <button onclick='PlayPauseNES()' id='nespause'>Pause</button>
+    <button onclick='if (document.getElementById("nescontroller").style.display == "none") { document.getElementById("nescontroller").style.display = "" } else { document.getElementById("nescontroller").style.display = "none" }'>Toggle Controller</button>
+    <br>
+    <div class="center2" style='width: 500px; height: 181px; display: none; background-image: url("nescontroller.webp");' id='nescontroller'>
+      <button id='NESupButton' style='left: 56px; top: 51px; display: block; position: relative; width: 31px; height: 32px; background-color: #00000000;'></button>
+      <button id='NESleftButton' style='left: 24px; top: 51px; display: block; position: relative; width: 32px; height: 31px; background-color: #00000000;'></button>
+      <button id='NESrightButton' style='left: 88px; top: 20px; display: block; position: relative; width: 32px; height: 31px; background-color: #00000000;'></button>
+      <button id='NESdownButton' style='left: 56px; top: 20px; display: block; position: relative; width: 31px; height: 32px; background-color: #00000000;'></button>
+      <button id='NESselectButton' style='left: 171px; top: -10px; display: block; position: relative; width: 43px; height: 17px; background-color: #00000000; border-radius: 1024px;'></button>
+      <button id='NESstartButton' style='left: 244px; top: -27px; display: block; position: relative; width: 43px; height: 17px; background-color: #00000000; border-radius: 1024px;'></button>
+      <button id='NESbButton' style='left: 332px; top: -62px; display: block; position: relative; width: 50px; height: 50px; background-color: #00000000; border-radius: 1024px;'></button>
+      <button id='NESaButton' style='left: 400px; top: -112px; display: block; position: relative; width: 50px; height: 50px; background-color: #00000000; border-radius: 1024px;'></button>
+      <pre style='position: relative; display: block; top: -90px;'>D-Pad: Arrow keys | Start: Enter | Select: Shift | B: Z | A: X</pre>
+    </div>
+  </div>
+  <div id='midicontrols' style='width: 600px; display: none;'>
+  <section id="section3">
+<midi-player
+  id='midiplayer'
+  src=''
+  sound-font visualizer="#section3 midi-visualizer">
+</midi-player>
+<midi-visualizer
+  id='midivisualizer'
+  src=''>
+</midi-visualizer>
+</section>
+</div>
+  <pre id='textresult' style='background-color: black; border-radius: 1px; border-width: 1px; border-color: rgb(255, 123, 255); border-style: dashed; display: none; text-align: left;'>blehhh</pre>
+  <video controls id='videocontrols' style='display: none;' src=''></video>
+  <audio controls id='audiocontrols' style='display: none;' src=''></audio>
+  <div class='center2 checkerboard2' style='background-color: #000000; width: 640px; height: 480px; display: none;' id='imagecontainer'>
+    <img style='color: white' class='center2' id='ResultIMG' alt='Image has been corrupted'>
+  </div>
+<br>
+<label>Amount of bits to flip</label>
+<br>
+  <input type='number' value=1 id='flipamount'>
+  <br>
+  <br>
+  <div>
+<label>Flip bits in bytes from</label>
+<br>
+  <input type='number' value=0 id='flipfromstart'><button onclick='flipfromstartreset()'>↻</button>
+  <br>
+  <label>to</label>
+  <br>
+  <input type='number' value=1999 id='flipfromend'><button onclick='flipfromendreset()'>↻</button>
+  <br>
+  </div>
+  <br>
+<button onclick='flipbit()'>Flip random bit(s)</button>
+<button onclick='UndoOrRedo()' id='undoredobutton' disabled style='color: grey;'>Undo</button>
+<button onclick='downloadarray()'>Download file</button>
+<button onclick='reloadfile()'>Reload file</button>
+<br>
+<br>
+<label id='flippedamount'>0 bits have been flipped</label>
+</div>
+
+<script>
+const fileInput = document.getElementById('fileInput');
+const ResultIMG = document.getElementById('ResultIMG');
+const flipamountinput = document.getElementById('flipamount')
+const flippedamount = document.getElementById('flippedamount')
+const controls = document.getElementById('controls')
+const imagecontainer = document.getElementById('imagecontainer')
+const audiosource = document.getElementById('audiosource')
+const audiocontrols = document.getElementById('audiocontrols')
+const videocontrols = document.getElementById('videocontrols')
+const textresult = document.getElementById('textresult')
+const flipfromstartinput = document.getElementById('flipfromstart')
+const flipfromendinput = document.getElementById('flipfromend')
+const midiplayer = document.getElementById('midiplayer')
+const midivisualizer = document.getElementById('midivisualizer')
+const midicontrols = document.getElementById('midicontrols')
+const nescontrols = document.getElementById('nescontrols')
+var bitsflipped = 0
+var fileformat = '.exe'
+var filetype = 'application'
+var filetype2 = 'application/x-msdownload'
+var oguint8Array = ''
+var uint8Array = ''
+var runningrom = ''
+var nesplaying = false
+var actionstate = ''
+var undoarray = ''
+var redoarray = ''
+var undobitsflipped = ''
+var redobitsflipped = ''
+var loading = false
+
+
+document.getElementById('NESupButton').addEventListener('touchdown', (e) => {
+  runningrom.pressDown('up')
+});
+document.getElementById('NESleftButton').addEventListener('touchdown', (e) => {
+  runningrom.pressDown('left')
+});
+document.getElementById('NESrightButton').addEventListener('touchdown', (e) => {
+  runningrom.pressDown('right')
+});
+document.getElementById('NESdownButton').addEventListener('touchdown', (e) => {
+  runningrom.pressDown('down')
+});
+document.getElementById('NESselectButton').addEventListener('touchdown', (e) => {
+  runningrom.pressDown('select')
+});
+document.getElementById('NESstartButton').addEventListener('touchdown', (e) => {
+  runningrom.pressDown('start')
+});
+document.getElementById('NESbButton').addEventListener('touchdown', (e) => {
+  runningrom.pressDown('b')
+});
+document.getElementById('NESaButton').addEventListener('touchdown', (e) => {
+  runningrom.pressDown('a')
+});
+document.getElementById('NESupButton').addEventListener('mousedown', (e) => {
+  runningrom.pressDown('up')
+});
+document.getElementById('NESleftButton').addEventListener('mousedown', (e) => {
+  runningrom.pressDown('left')
+});
+document.getElementById('NESrightButton').addEventListener('mousedown', (e) => {
+  runningrom.pressDown('right')
+});
+document.getElementById('NESdownButton').addEventListener('mousedown', (e) => {
+  runningrom.pressDown('down')
+});
+document.getElementById('NESselectButton').addEventListener('mousedown', (e) => {
+  runningrom.pressDown('select')
+});
+document.getElementById('NESstartButton').addEventListener('mousedown', (e) => {
+  runningrom.pressDown('start')
+});
+document.getElementById('NESbButton').addEventListener('mousedown', (e) => {
+  runningrom.pressDown('b')
+});
+document.getElementById('NESaButton').addEventListener('mousedown', (e) => {
+  runningrom.pressDown('a')
+});
+
+document.getElementById('NESupButton').addEventListener('touchup', (e) => {
+  runningrom.pressUp('up')
+});
+document.getElementById('NESleftButton').addEventListener('touchup', (e) => {
+  runningrom.pressUp('left')
+});
+document.getElementById('NESrightButton').addEventListener('touchup', (e) => {
+  runningrom.pressUp('right')
+});
+document.getElementById('NESdownButton').addEventListener('touchup', (e) => {
+  runningrom.pressUp('down')
+});
+document.getElementById('NESselectButton').addEventListener('touchup', (e) => {
+  runningrom.pressUp('select')
+});
+document.getElementById('NESstartButton').addEventListener('touchup', (e) => {
+  runningrom.pressUp('start')
+});
+document.getElementById('NESbButton').addEventListener('touchup', (e) => {
+  runningrom.pressUp('b')
+});
+document.getElementById('NESaButton').addEventListener('touchup', (e) => {
+  runningrom.pressUp('a')
+});
+document.getElementById('NESupButton').addEventListener('mouseup', (e) => {
+  runningrom.pressUp('up')
+});
+document.getElementById('NESleftButton').addEventListener('mouseup', (e) => {
+  runningrom.pressUp('left')
+});
+document.getElementById('NESrightButton').addEventListener('mouseup', (e) => {
+  runningrom.pressUp('right')
+});
+document.getElementById('NESdownButton').addEventListener('mouseup', (e) => {
+  runningrom.pressUp('down')
+});
+document.getElementById('NESselectButton').addEventListener('mouseup', (e) => {
+  runningrom.pressUp('select')
+});
+document.getElementById('NESstartButton').addEventListener('mouseup', (e) => {
+  runningrom.pressUp('start')
+});
+document.getElementById('NESbButton').addEventListener('mouseup', (e) => {
+  runningrom.pressUp('b')
+});
+document.getElementById('NESaButton').addEventListener('mouseup', (e) => {
+  runningrom.pressUp('a')
+});
+
+    var started = false
+async function runGameNES(nesROM) {
+  nesplaying = true
+    if (started == true) {
+        await stopGameNES()
+    }
+    if (started == false) {
+        started = true
+    }
+    runningrom = await Nostalgist.launch({
+  	core: 'fceumm',
+    rom: nesROM,
+    element: document.getElementById('nescanvas'),
+  });
+}
+async function runCurrentGameNES(nesROM) {
+  await runGameNES(uint8Array)
+}
+function PlayPauseNES() {
+  if (nesplaying == true) {
+    nesplaying = false
+    runningrom.pause()
+    document.getElementById('nespause').textContent = 'Resume'
+
+  } else {
+    nesplaying = true
+    runningrom.resume()
+    document.getElementById('nespause').textContent = 'Pause'
+  }
+}
+async function stopGameNES() {
+    runningrom.exit({ removeCanvas: false })
+  document.getElementById('canvas').id = 'nescanvas'
+}
+const decoder = new TextDecoder('utf-8');
+fileInput.addEventListener('change', async (event) => {
+  bitsflipped = 0
+	const file = event.target.files[0];
+    if (!file) return;
+    const buffer = await file.arrayBuffer();
+    uint8Array = new Uint8Array(buffer);
+    var blob = 0
+    console.log(file.type)
+    if (file && file.type.startsWith('audio/')) {
+      //Audio files
+      filetype = 'audio'
+    } else if (file && file.type.startsWith('image/')) {
+      //Image files
+      filetype = 'image'
+    } else if (file && file.type.startsWith('video/')) {
+      //Video files
+      filetype = 'video'
+    } else if (file && file.type.startsWith('text/')) {
+      //Text files
+      filetype = 'text'
+    }
+    if (file && file.type.startsWith('audio/mid')) {
+      //MIDI files
+      filetype = 'midi'
+    }
+    if (file.name.split('.').pop() == 'nes') {
+      //NES files
+      filetype = 'nes'
+    }
+    blob = new Blob([uint8Array], { type: file.type });
+    filetype2 = file.type
+	const reader = new FileReader();
+	reader.onload = (e) => {
+	  const dataUrl = e.target.result;
+    if (filetype == 'image') {
+    imagecontainer.style.display = ''
+    videocontrols.style.display = 'none'
+    audiocontrols.style.display = 'none'
+    textresult.style.display = 'none'
+    nescontrols.style.display = 'none'
+    midicontrols.style.display = 'none'
+    ResultIMG.src = dataUrl
+    var img = new Image;
+
+    img.onload = function() {
+        console.log(img.width)
+        imagecontainer.setAttribute('style','background-color: #000000; width:' + img.width +'px; height:' + img.height +'px');
+        imagecontainer.height = img.height
+    };
+
+    img.src = dataUrl;
+    }
+    if (filetype == 'audio') {
+      //console.log('yea')
+      //console.log(audiocontrols.style.display)
+      audiocontrols.style.display = ''
+      videocontrols.style.display = 'none'
+      imagecontainer.style.display = 'none'
+      textresult.style.display = 'none'
+      nescontrols.style.display = 'none'
+      midicontrols.style.display = 'none'
+      audiocontrols.src = dataUrl
+    }
+    if (filetype == 'video') {
+      videocontrols.style.display = ''
+      audiocontrols.style.display = 'none'
+      imagecontainer.style.display = 'none'
+      textresult.style.display = 'none'
+      nescontrols.style.display = 'none'
+      midicontrols.style.display = 'none'
+      videocontrols.src = dataUrl
+    }
+    if (filetype == 'text') {
+      textresult.style.display = ''
+      audiocontrols.style.display = 'none'
+      imagecontainer.style.display = 'none'
+      videocontrols.style.display = 'none'
+      nescontrols.style.display = 'none'
+      midicontrols.style.display = 'none'
+      textresult.textContent = decoder.decode(uint8Array); 
+    }
+    if (filetype == 'midi') {
+      textresult.style.display = 'none'
+      audiocontrols.style.display = 'none'
+      imagecontainer.style.display = 'none'
+      videocontrols.style.display = 'none'
+      nescontrols.style.display = 'none'
+      midicontrols.style.display = ''
+      console.log('kntooooo')
+      midiplayer.src = dataUrl
+      midivisualizer.src = dataUrl
+    }
+    if (filetype == 'nes') {
+      textresult.style.display = 'none'
+      audiocontrols.style.display = 'none'
+      imagecontainer.style.display = 'none'
+      videocontrols.style.display = 'none'
+      midicontrols.style.display = 'none'
+      nescontrols.style.display = ''
+      runGameNES(dataUrl)
+    } else {
+      stopGameNES()
+      nescontrols.style.display = 'none'
+    }
+     console.log(dataUrl)
+
+	};
+	reader.readAsDataURL(blob);
+  controls.style.display = ''
+  if (file && file.type.startsWith('audio/')) {
+    //Audio files
+    
+  }
+  fileformat = '.' + file.name.split('.').pop();
+  oguint8Array = new Uint8Array(uint8Array);
+  console.log('kntooo')
+  flippedamount.innerText = bitsflipped + ' bits have been flipped'
+  flipfromendinput.value = uint8Array.length - 1
+  document.getElementById('undoredobutton').disabled = true;
+    document.getElementById('undoredobutton').style.color = 'grey'
+    document.getElementById('undoredobutton').textContent = 'Undo'
+    actionstate = ''
+});
+function load() {
+  loading = true
+  var blob = new Blob([uint8Array], { type: filetype2 });
+  const reader = new FileReader();
+	 reader.onload = async (e) => {
+	  const dataUrl = e.target.result;
+ 	 ResultIMG.src = dataUrl
+   if (filetype == 'audio') {
+      audiocontrols.src = dataUrl
+    }
+    if (filetype == 'video') {
+      videocontrols.style.display = ''
+      videocontrols.src = dataUrl
+    }
+    if (filetype == 'text') {
+      textresult.style.display = ''
+      textresult.textContent = decoder.decode(uint8Array); 
+    }
+    if (filetype == 'midi') {
+      midicontrols.style.display = ''
+      console.log('kntooooo')
+      midiplayer.src = dataUrl
+      midivisualizer.src = dataUrl
+    }
+    if (filetype == 'nes') {
+      nescontrols.style.display = ''
+      await runGameNES(dataUrl)
+    }
+    loading = false
+	};
+	reader.readAsDataURL(blob);
+}
+function flipbit() {
+  if (loading == false) {
+  bitsflipped = bitsflipped + Number(flipamountinput.value)
+  flippedamount.innerText = bitsflipped + ' bits have been flipped'
+  undoarray = new Uint8Array(uint8Array)
+  for (let i = 0; i < flipamountinput.value; i++) {
+	var random = Math.floor(Math.random() * (flipfromendinput.value - (flipfromstartinput.value - 1))) + Number(flipfromstartinput.value) + 1
+  //console.log(random)
+  //console.log(uint8Array[random])
+  //console.log(uint8Array)
+  var random2 = Math.floor(Math.random() * 8) + 1;
+  var flipper = 0
+  if (random2 == 1) {
+    flipper = 1;
+  } else if (random2 == 2) {
+    flipper = 2;
+  } else if (random2 == 3) {
+    flipper = 4;
+  } else if (random2 == 4) {
+   flipper = 8;
+  } else if (random2 == 5) {
+   flipper = 16;
+  } else if (random2 == 6) {
+   flipper = 32;
+  } else if (random2 == 7) {
+    flipper = 64;
+  } else if (random2 == 8) {
+    flipper = 128;
+  }	
+	  //console.log(random2)
+    //console.log(uint8Array[random])
+	  if ((uint8Array[random] >> (random2 - 1)) & 1 === 1) {
+    	//console.log('negative')
+    	uint8Array[random] = (uint8Array[random] - flipper) % 256
+    } else {
+    	//console.log('postive')
+    	uint8Array[random] = (uint8Array[random] + flipper) % 256
+    }
+  }
+    //console.log(uint8Array[random])
+    document.getElementById('undoredobutton').disabled = false;
+    document.getElementById('undoredobutton').style.color = 'white'
+    document.getElementById('undoredobutton').textContent = 'Undo'
+    actionstate = 'undo'
+    load()
+  }
+}
+function UndoOrRedo() {
+  if (actionstate == 'undo') {
+    redoarray = new Uint8Array(uint8Array)
+    uint8Array = new Uint8Array(undoarray)
+    redobitsflipped = bitsflipped
+    bitsflipped = Number(undobitsflipped)
+    document.getElementById('undoredobutton').textContent = 'Redo'
+    actionstate = 'redo'
+  } else if (actionstate == 'redo') {
+    undoarray = new Uint8Array(uint8Array)
+    uint8Array = new Uint8Array(redoarray)
+    undobitsflipped = bitsflipped
+    bitsflipped = Number(redobitsflipped)
+    document.getElementById('undoredobutton').textContent = 'Undo'
+    actionstate = 'undo'
+  }
+  load()
+  flippedamount.innerText = bitsflipped + ' bits have been flipped'
+}
+function downloadarray() {
+  const blob = new Blob([uint8Array], { type: 'application/octet-stream' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.style.display = 'none';
+  a.href = url;
+  a.download = 'DigitalRotter' + fileformat;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
+}
+function reloadfile() {
+  uint8Array = new Uint8Array(oguint8Array);
+  bitsflipped = 0
+  flippedamount.innerText = bitsflipped + ' bits have been flipped'
+  load()
+}
+function flipfromendreset() {
+  flipfromendinput.value = uint8Array.length - 1
+}
+function flipfromstartreset() {
+  flipfromstartinput.value = 0
+  //most useful function here trust me PLEASE
+}
+</script>
+<script src="html-midi-player.js"></script>
+<script src='nostalgist.umd.js'></script>
+</body>
+</html>
