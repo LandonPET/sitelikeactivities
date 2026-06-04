@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <title>Digital Rotter v1.35</title>
+  <link rel="icon" type="image/x-icon" href="favicon.png">
+  <meta property="og:image" content="DigitalRotterIcon2.gif">
+<meta property="og:image:type" content="image/gif">
     <style>
       .checkerboard {
             background-size: 50px 50px;
@@ -152,7 +156,7 @@ button {
     </pre>
   </div>
 <pre style='position: absolute; top: 0; right: 0; font-size: 12px; margin-right: 32px; text-align: right; margin-top: 0;'>Version
-  1.3</pre>
+  1.35</pre>
 <button style='font-size: 20px; padding: 0; width: 32px; position: absolute; top: 0; right: 0;' onclick='if (document.getElementById("infomenu").style.display == "none") { document.getElementById("infomenu").style.display = "" } else { document.getElementById("infomenu").style.display = "none" }'>🛈</button>
 <label style='font-size: 36px; position: absolute; top: 0px;'>Digital Rot Emulator</label>
 <input class="center2" style='position:absolute; top: 0; margin:auto; margin-top: 48px;' type='file' id='fileInput'>
@@ -546,6 +550,7 @@ function load() {
 }
 function flipbit() {
   if (loading == false) {
+  undobitsflipped = Number(bitsflipped)
   bitsflipped = bitsflipped + Number(flipamountinput.value)
   flippedamount.innerText = bitsflipped + ' bits have been flipped'
   undoarray = new Uint8Array(uint8Array)
